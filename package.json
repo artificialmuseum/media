@@ -4,18 +4,40 @@
   "description": "media files for the artificialmuseum.com",
   "main": "index.js",
   "type": "module",
+  "private": true,
   "scripts": {
+    "start": "npm run dev",
+    "dev": "node node_modules/@grundstein/gss/src/bin.mjs --dir ./docs --port 8004 --cors '*'",
+    "build": "npm run audio && npm run video",
     "audio": "./src/audio.js",
     "video": "./src/video.js",
     "format": "f -w -e js"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/artificialmuseum/media.artificialmuseum.com.git"
+  },
   "keywords": [],
   "author": "TheSystemCollective",
+  "bugs": {
+    "url": "https://github.com/artificialmuseum/media.artificialmuseum.com/issues"
+  },
+  "homepage": "https://github.com/artificialmuseum/media.artificialmuseum.com#readme",
   "devDependencies": {
     "@magic/fs": "0.0.13",
     "@magic/log": "0.1.9"
   },
   "dependencies": {
     "@grundstein/gss": "github:grundstein/gss"
-  }
+  },
+  "contributors": [
+    {
+      "name": "jascha ehrenreich",
+      "github": "jaeh"
+    },
+    {
+      "name": "daniela weiss",
+      "github": "mslitto"
+    }
+  ]
 }
