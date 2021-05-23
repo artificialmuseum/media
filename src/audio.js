@@ -24,7 +24,7 @@ const fn = async () => {
     const parsedInfo = JSON.parse(mediainfo)
 
     const { BitRate, SamplingRate } = parsedInfo.media.track[1]
-    const bitrate = findClosest(BitRate / 1000, [64, 128, 160])
+    const bitrate = findClosest(BitRate / 1000, [64, 128, 160, 192])
     const samplingRate = findClosest(SamplingRate, [44100, 48000])
 
     const cmd = 'ffmpeg -hide_banner -loglevel error'
