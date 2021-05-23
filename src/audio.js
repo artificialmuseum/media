@@ -41,11 +41,11 @@ const fn = async () => {
       log.success('done')
     }
 
-    const ogaName = file.replace(srcExt, '.oga')
-    const ogaExists = fs.existsSync(ogaName)
-    if (!ogaExists) {
-      log.info('Converting', ogaName)
-      const output = `./docs/audio/${path.basename(ogaName)}`
+    const oggName = file.replace(srcExt, '.ogg')
+    const oggExists = fs.existsSync(oggName)
+    if (!oggExists) {
+      log.info('Converting', oggName)
+      const output = `./docs/audio/${path.basename(oggName)}`
       const args = `-i ${file} -vn -c:a libvorbis -b:a ${bitrate}k -ar ${samplingRate}`
       // run sync to make sure only one file converts at a time
       const c = `${cmd} ${args} ${output}`
