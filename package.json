@@ -12,8 +12,8 @@
   "keywords": [],
   "author": "TheSystemCollective",
   "devDependencies": {
-    "@magic/cli": "0.0.32",
-    "@magic/fs": "0.0.13"
+    "@magic/fs": "0.0.13",
+    "@magic/log": "0.1.9"
   },
   "dependencies": {
     "@grundstein/gss": "github:grundstein/gss"
