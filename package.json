@@ -1,0 +1,21 @@
+{
+  "name": "media.artificialmuseum.com",
+  "version": "0.0.1",
+  "description": "media files for the artificialmuseum.com",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "audio": "./src/audio.js",
+    "video": "./src/video.js",
+    "format": "f -w -e js"
+  },
+  "keywords": [],
+  "author": "TheSystemCollective",
+  "devDependencies": {
+    "@magic/cli": "0.0.32",
+    "@magic/fs": "0.0.13"
+  },
+  "dependencies": {
+    "@grundstein/gss": "github:grundstein/gss"
+  }
+}
