@@ -4,7 +4,7 @@ import child_process from 'child_process'
 import path from 'path'
 
 import fs from '@magic/fs'
-
+import log from '@magic/log'
 
 const fn = async () => {
   const cwd = process.cwd()
