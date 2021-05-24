@@ -14,7 +14,7 @@ const fn = async () => {
 
   const srcExt = '.mp4'
 
-  files.map(file => {
+  files.forEach(file => {
     const ext = path.extname(file)
     if (ext !== srcExt) {
       return
