@@ -6,13 +6,86 @@ import path from 'path'
 import fs from '@magic/fs'
 import log from '@magic/log'
 
+
+const srcExt = '.mp4'
+const cmd = 'ffmpeg'
+
+const createWebm = ({ dir, fileName, mp4Options }) => {
+  const webmPath = `${dir}/${fileName}.webm`
+  const webmExists = fs.existsSync(webmPath)
+
+  if (webmExists) {
+    return
+  }
+
+  // const { BitRate, SamplingRate } = parsedInfo.media.track[1]
+  // const bitrate = findClosest(BitRate / 1000, [64, 128, 160, 192])
+  // const samplingRate = findClosest(SamplingRate, [44100, 48000])
+
+  // console.log({ BitRate, SamplingRate })
+
+  const videoBitRate = Math.floor(mp4Options.video.BitRate * 0.6)
+
+  const args = [
+    '-i', `${dir}/${fileName}${srcExt}`,
+    '-c:v', 'libvpx',
+    '-b:v', videoBitRate,
+  ]
+
+  if (mp4Options.audio) {
+    const audioArgs = ['-c:a', 'libvorbis']
+    args.push(...audioArgs)
+  }
+
+  const output = `./docs/video/${fileName}/${fileName}.webm`
+
+  log('Converting', output)
+  const ffmpeg = `${cmd} ${args.join(' ')} ${output}`
+  console.warn('exec', ffmpeg)
+  child_process.execSync(ffmpeg)
+  log.success('done')
+}
+
+const createOgv = ({ dir, fileName, mp4Options }) => {
+  const ogvPath = `${dir}/${fileName}.ogv`
+  const ogvExists = fs.existsSync(ogvPath)
+
+  if (ogvExists) {
+    return
+  }
+
+  // const { BitRate, SamplingRate } = parsedInfo.media.track[1]
+  // const bitrate = findClosest(BitRate / 1000, [64, 128, 160, 192])
+  // const samplingRate = findClosest(SamplingRate, [44100, 48000])
+
+  // console.log({ BitRate, SamplingRate })
+
+  const videoBitRate = Math.floor(mp4Options.video.BitRate * 0.6)
+
+  const args = [
+    '-i', `${dir}/${fileName}${srcExt}`,
+    '-codec:v', 'libtheora',
+    '-b:v', videoBitRate,
+  ]
+
+  if (mp4Options.audio) {
+    const audioArgs = ['-c:a', 'libvorbis']
+    args.push(...audioArgs)
+  }
+
+  const output = `./docs/video/${fileName}/${fileName}.ogv`
+
+  log('Converting', output)
+  const ffmpeg = `${cmd} ${args.join(' ')} ${output}`
+  console.warn('exec', ffmpeg)
+  child_process.execSync(ffmpeg)
+  log.success('done')
+}
+
 const fn = async () => {
   const cwd = process.cwd()
   const videoDir = path.join(cwd, 'docs', 'video')
   const dirs = await fs.getDirectories(videoDir)
-
-  const srcExt = '.mp4'
-  const cmd = 'ffmpeg'
 
   dirs.map(dir => {
     if (dir === videoDir) {
@@ -61,39 +134,10 @@ const fn = async () => {
       }
     })
 
-    const webmPath = `${dir}/${fileName}.webm`
-    const webmExists = fs.existsSync(webmPath)
 
-    if (webmExists) {
-      return
-    }
+    createWebm({ dir, fileName, mp4Options, srcExt })
 
-    // const { BitRate, SamplingRate } = parsedInfo.media.track[1]
-    // const bitrate = findClosest(BitRate / 1000, [64, 128, 160, 192])
-    // const samplingRate = findClosest(SamplingRate, [44100, 48000])
-
-    // console.log({ BitRate, SamplingRate })
-
-    const videoBitRate = Math.floor(mp4Options.video.BitRate * 0.6)
-
-    const args = [
-      '-i', `${dir}/${fileName}${srcExt}`,
-      '-c:v', 'libvpx',
-      '-b:v', videoBitRate,
-    ]
-
-    if (mp4Options.audio) {
-      const audioArgs = ['-c:a', 'libvorbis']
-      args.push(...audioArgs)
-    }
-
-    const output = `./docs/video/${fileName}/${fileName}.webm`
-
-    log('Converting', output)
-    const ffmpeg = `${cmd} ${args.join(' ')} ${output}`
-    console.warn('exec', ffmpeg)
-    child_process.execSync(ffmpeg)
-    log.success('done')
+    createOgv({ dir, fileName, mp4Options, srcExt })
   })
 
   const videoFiles = await fs.getFiles(videoDir)
@@ -106,5 +150,6 @@ const fn = async () => {
     }
   }))
 }
+
 
 fn()
