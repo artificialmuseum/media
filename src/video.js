@@ -10,6 +10,48 @@ import log from '@magic/log'
 const srcExt = '.mp4'
 const cmd = 'ffmpeg'
 
+const getMp4Options = (mp4Path) => {
+  const mp4Info = child_process.execSync(`mediainfo --Output=JSON ${mp4Path}`)
+  const parsedInfo = JSON.parse(mp4Info)
+
+  const mp4Options = {}
+
+  parsedInfo.media.track.forEach(asset => {
+    if (asset['@type'] === 'Video') {
+      const { BitRate, Format, CodecID } = asset
+
+      if (Format !== 'AVC') {
+        throw new Error(`MP4 Video Error: Format is expected to be AVC, got ${Format}`)
+      }
+
+      if (CodecID !== 'avc1') {
+        throw new Error(`MP4 Video Error: CodecID is expected to be avc1, got ${CodecID}`)
+      }
+
+      mp4Options.video = {
+        BitRate,
+      }
+    } else if (asset['@type'] === 'Audio') {
+      const { BitRate, SamplingRate, Format, CodecID } = asset
+
+      if (Format !== 'AAC') {
+        throw new Error(`MP4 Audio Error: Format is expected to be AAC, got ${Format}`)
+      }
+
+      if (CodecID !== 'mp4a-40-2') {
+        throw new Error(`MP4 Video Error: CodecID is expected to be mp4a-40-2, got ${CodecID}`)
+      }
+
+      mp4Options.audio = {
+        BitRate,
+        SamplingRate,
+      }
+    }
+  })
+
+  return mp4Options
+}
+
 const createWebm = ({ dir, fileName, mp4Options }) => {
   const webmPath = `${dir}/${fileName}.webm`
   const webmExists = fs.existsSync(webmPath)
@@ -17,12 +59,6 @@ const createWebm = ({ dir, fileName, mp4Options }) => {
   if (webmExists) {
     return
   }
-
-  // const { BitRate, SamplingRate } = parsedInfo.media.track[1]
-  // const bitrate = findClosest(BitRate / 1000, [64, 128, 160, 192])
-  // const samplingRate = findClosest(SamplingRate, [44100, 48000])
-
-  // console.log({ BitRate, SamplingRate })
 
   const videoBitRate = Math.floor(mp4Options.video.BitRate * 0.6)
 
@@ -37,28 +73,22 @@ const createWebm = ({ dir, fileName, mp4Options }) => {
     args.push(...audioArgs)
   }
 
-  const output = `./docs/video/${fileName}/${fileName}.webm`
+  const output = path.join(dir, `${fileName}.webm`)
 
   log('Converting', output)
   const ffmpeg = `${cmd} ${args.join(' ')} ${output}`
-  console.warn('exec', ffmpeg)
+  log.warn('exec', ffmpeg)
   child_process.execSync(ffmpeg)
   log.success('done')
 }
 
 const createOgv = ({ dir, fileName, mp4Options }) => {
-  const ogvPath = `${dir}/${fileName}.ogv`
+  const ogvPath = path.join(dir, `${fileName}.ogv`)
   const ogvExists = fs.existsSync(ogvPath)
 
   if (ogvExists) {
     return
   }
-
-  // const { BitRate, SamplingRate } = parsedInfo.media.track[1]
-  // const bitrate = findClosest(BitRate / 1000, [64, 128, 160, 192])
-  // const samplingRate = findClosest(SamplingRate, [44100, 48000])
-
-  // console.log({ BitRate, SamplingRate })
 
   const videoBitRate = Math.floor(mp4Options.video.BitRate * 0.6)
 
@@ -73,83 +103,54 @@ const createOgv = ({ dir, fileName, mp4Options }) => {
     args.push(...audioArgs)
   }
 
-  const output = `./docs/video/${fileName}/${fileName}.ogv`
+  const output = path.join(dir, `${fileName}.ogv`)
 
   log('Converting', output)
   const ffmpeg = `${cmd} ${args.join(' ')} ${output}`
-  console.warn('exec', ffmpeg)
+  log.warn('exec', ffmpeg)
   child_process.execSync(ffmpeg)
   log.success('done')
 }
 
-const fn = async () => {
-  const cwd = process.cwd()
-  const videoDir = path.join(cwd, 'docs', 'video')
-  const dirs = await fs.getDirectories(videoDir)
+const fn = async (videoDir) => {
+  const files = await fs.getFiles(videoDir)
 
-  dirs.map(dir => {
-    if (dir === videoDir) {
-      return
-    }
+  const mp4Files = files.filter(file => file.endsWith('.mp4'))
 
-    const fileName = path.basename(dir)
+  await Promise.all(mp4Files.map(async file => {
+    const fileName = path.basename(file).replace('.mp4', '')
+    const dir = path.dirname(file)
 
-    const mp4Path = `${dir}/${fileName}.mp4`
+    const mp4Options = getMp4Options(file)
 
-    const mp4Info = child_process.execSync(`mediainfo --Output=JSON ${mp4Path}`)
-    const parsedInfo = JSON.parse(mp4Info)
-
-    const mp4Options = {}
-
-    parsedInfo.media.track.forEach(asset => {
-      if (asset['@type'] === 'Video') {
-        const { BitRate, Format, CodecID } = asset
-
-        if (Format !== 'AVC') {
-          throw new Error(`MP4 Video Error: Format is expected to be AVC, got ${Format}`)
-        }
-
-        if (CodecID !== 'avc1') {
-          throw new Error(`MP4 Video Error: CodecID is expected to be avc1, got ${CodecID}`)
-        }
-
-        mp4Options.video = {
-          BitRate,
-        }
-      } else if (asset['@type'] === 'Audio') {
-        const { BitRate, SamplingRate, Format, CodecID } = asset
-
-        if (Format !== 'AAC') {
-          throw new Error(`MP4 Audio Error: Format is expected to be AAC, got ${Format}`)
-        }
-
-        if (CodecID !== 'mp4a-40-2') {
-          throw new Error(`MP4 Video Error: CodecID is expected to be mp4a-40-2, got ${CodecID}`)
-        }
-
-        mp4Options.audio = {
-          BitRate,
-          SamplingRate,
-        }
-      }
-    })
-
-
-    createWebm({ dir, fileName, mp4Options, srcExt })
-
-    createOgv({ dir, fileName, mp4Options, srcExt })
-  })
+    await createWebm({ dir, fileName, mp4Options })
+    await createOgv({ dir, fileName, mp4Options })
+  }))
 
   const videoFiles = await fs.getFiles(videoDir)
 
-  await Promise.all(videoFiles.map(async video => {
+  const results = await Promise.all(videoFiles.map(async video => {
     const stat = await fs.stat(video)
 
     if (stat.size === 0) {
       log.error('E_EMPTY_FILE', `Empty Video File: ${video}`)
+      return false
     }
+    return true
   }))
+
+  if (!results.some(a => a === false)) {
+    log.success('CONVERTED all video files in', videoDir)
+  }
 }
 
+const main = async () => {
+  const cwd = process.cwd()
+  const videoDir = path.join(cwd, 'docs', 'video')
+  await fn(videoDir)
 
-fn()
+  const assetVideoDir = path.join(cwd, 'docs', 'assets', 'video')
+  await fn(assetVideoDir)
+}
+
+main()
