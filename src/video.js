@@ -60,7 +60,7 @@ const createWebm = ({ dir, fileName, mp4Options }) => {
     return
   }
 
-  const videoBitRate = Math.floor(mp4Options.video.BitRate * 0.6)
+  const videoBitRate = Math.floor(mp4Options.video.BitRate * 0.8)
 
   const args = [
     '-i', `${dir}/${fileName}${srcExt}`,
@@ -90,12 +90,10 @@ const createOgv = ({ dir, fileName, mp4Options }) => {
     return
   }
 
-  const videoBitRate = Math.floor(mp4Options.video.BitRate * 0.6)
-
   const args = [
     '-i', `${dir}/${fileName}${srcExt}`,
     '-codec:v', 'libtheora',
-    '-b:v', videoBitRate,
+    '-b:v', mp4Options.video.BitRate,
   ]
 
   if (mp4Options.audio) {
