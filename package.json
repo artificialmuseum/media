@@ -28,7 +28,7 @@
     "@magic/log": "0.1.10"
   },
   "dependencies": {
-    "@grundstein/gss": "github:grundstein/gss"
+    "@grundstein/gss": "0.0.4"
   },
   "contributors": [
     {
