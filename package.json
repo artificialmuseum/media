@@ -24,6 +24,7 @@
   },
   "homepage": "https://github.com/artificialmuseum/media.artificialmuseum.com#readme",
   "devDependencies": {
+    "@magic/format": "0.0.31",
     "@magic/fs": "0.0.17",
     "@magic/log": "0.1.10"
   },
