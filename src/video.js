@@ -60,12 +60,12 @@ const createWebm = ({ dir, fileName, mp4Options }) => {
     return
   }
 
-  const videoBitRate = Math.floor(mp4Options.video.BitRate * 0.8)
+  const videoBitRate = Math.floor(mp4Options.video.BitRate * 0.9)
 
   const args = [
     '-i', `${dir}/${fileName}${srcExt}`,
     '-c:v', 'libvpx',
-    '-b:v', videoBitRate,
+    // '-b:v', videoBitRate,
   ]
 
   if (mp4Options.audio) {
@@ -122,7 +122,10 @@ const fn = async (videoDir) => {
     const mp4Options = getMp4Options(file)
 
     await createWebm({ dir, fileName, mp4Options })
-    await createOgv({ dir, fileName, mp4Options })
+
+    /* support is 36%, all browsers that support ogv support webm */
+    /* TODO: add av1 video instead */
+    // await createOgv({ dir, fileName, mp4Options })
   }))
 
   const videoFiles = await fs.getFiles(videoDir)
