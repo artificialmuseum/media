@@ -60,12 +60,12 @@ const createWebm = ({ dir, fileName, mp4Options }) => {
     return
   }
 
-  // const videoBitRate = Math.floor(mp4Options.video.BitRate * 0.9)
+  const videoBitRate = Math.floor(mp4Options.video.BitRate * 0.9)
 
   const args = [
     '-i', `${dir}/${fileName}${srcExt}`,
     '-c:v', 'libvpx',
-    '-b:v', mp4Options.video.BitRate,
+    '-b:v', videoBitRate,
   ]
 
   if (mp4Options.audio) {
