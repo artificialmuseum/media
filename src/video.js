@@ -6,11 +6,10 @@ import path from 'path'
 import fs from '@magic/fs'
 import log from '@magic/log'
 
-
 const srcExt = '.mp4'
 const cmd = 'ffmpeg'
 
-const getMp4Options = (mp4Path) => {
+const getMp4Options = mp4Path => {
   const mp4Info = child_process.execSync(`mediainfo --Output=JSON ${mp4Path}`)
   const parsedInfo = JSON.parse(mp4Info)
 
@@ -62,11 +61,7 @@ const createWebm = ({ dir, fileName, mp4Options }) => {
 
   const videoBitRate = Math.floor(mp4Options.video.BitRate * 0.9)
 
-  const args = [
-    '-i', `${dir}/${fileName}${srcExt}`,
-    '-c:v', 'libvpx',
-    '-b:v', videoBitRate,
-  ]
+  const args = ['-i', `${dir}/${fileName}${srcExt}`, '-c:v', 'libvpx', '-b:v', videoBitRate]
 
   if (mp4Options.audio) {
     const audioArgs = ['-c:a', 'libvorbis']
@@ -91,9 +86,12 @@ const createOgv = ({ dir, fileName, mp4Options }) => {
   }
 
   const args = [
-    '-i', `${dir}/${fileName}${srcExt}`,
-    '-codec:v', 'libtheora',
-    '-b:v', mp4Options.video.BitRate,
+    '-i',
+    `${dir}/${fileName}${srcExt}`,
+    '-codec:v',
+    'libtheora',
+    '-b:v',
+    mp4Options.video.BitRate,
   ]
 
   if (mp4Options.audio) {
@@ -110,35 +108,39 @@ const createOgv = ({ dir, fileName, mp4Options }) => {
   log.success('done')
 }
 
-const fn = async (videoDir) => {
+const fn = async videoDir => {
   const files = await fs.getFiles(videoDir)
 
   const mp4Files = files.filter(file => file.endsWith('.mp4'))
 
-  await Promise.all(mp4Files.map(async file => {
-    const fileName = path.basename(file).replace('.mp4', '')
-    const dir = path.dirname(file)
+  await Promise.all(
+    mp4Files.map(async file => {
+      const fileName = path.basename(file).replace('.mp4', '')
+      const dir = path.dirname(file)
 
-    const mp4Options = getMp4Options(file)
+      const mp4Options = getMp4Options(file)
 
-    await createWebm({ dir, fileName, mp4Options })
+      await createWebm({ dir, fileName, mp4Options })
 
-    /* support is 36%, all browsers that support ogv support webm */
-    /* TODO: add av1 video instead */
-    // await createOgv({ dir, fileName, mp4Options })
-  }))
+      /* support is 36%, all browsers that support ogv support webm */
+      /* TODO: add av1 video instead */
+      // await createOgv({ dir, fileName, mp4Options })
+    }),
+  )
 
   const videoFiles = await fs.getFiles(videoDir)
 
-  const results = await Promise.all(videoFiles.map(async video => {
-    const stat = await fs.stat(video)
+  const results = await Promise.all(
+    videoFiles.map(async video => {
+      const stat = await fs.stat(video)
 
-    if (stat.size === 0) {
-      log.error('E_EMPTY_FILE', `Empty Video File: ${video}`)
-      return false
-    }
-    return true
-  }))
+      if (stat.size === 0) {
+        log.error('E_EMPTY_FILE', `Empty Video File: ${video}`)
+        return false
+      }
+      return true
+    }),
+  )
 
   if (!results.some(a => a === false)) {
     log.success('CONVERTED all video files in', videoDir)
