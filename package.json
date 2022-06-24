@@ -24,12 +24,12 @@
   },
   "homepage": "https://github.com/artificialmuseum/media.artificialmuseum.com#readme",
   "devDependencies": {
-    "@magic/format": "0.0.31",
-    "@magic/fs": "0.0.17",
-    "@magic/log": "0.1.10"
+    "@magic/format": "0.0.43",
+    "@magic/fs": "0.0.27",
+    "@magic/log": "0.1.17"
   },
   "dependencies": {
-    "@grundstein/gss": "0.0.4"
+    "@grundstein/gss": "0.0.14"
   },
   "contributors": [
     {
