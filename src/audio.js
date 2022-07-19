@@ -33,7 +33,7 @@ const fn = async () => {
     const mp3Exists = fs.existsSync(mp3Name)
     if (!mp3Exists) {
       log.info('Converting', mp3Name)
-      const output = `./docs/audio/${path.basename(mp3Name)}`
+      const output = mp3Name
       const args = `-i ${file} -acodec libmp3lame -ar ${samplingRate} -ac 2 -ab ${bitrate}k`
       // run sync to make sure only one file converts at a time
       const c = `${cmd} ${args} ${output}`
@@ -45,7 +45,7 @@ const fn = async () => {
     const oggExists = fs.existsSync(oggName)
     if (!oggExists) {
       log.info('Converting', oggName)
-      const output = `./docs/audio/${path.basename(oggName)}`
+      const output = oggName
       const args = `-i ${file} -vn -c:a libvorbis -b:a ${bitrate}k -ar ${samplingRate}`
       // run sync to make sure only one file converts at a time
       const c = `${cmd} ${args} ${output}`
